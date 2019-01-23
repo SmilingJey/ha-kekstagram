@@ -1,3 +1,5 @@
+'use strict';
+
 (function(){
   var uploadFormElement = document.querySelector('#upload-select-image');
   var inputUploadFileElement = uploadFormElement.querySelector('#upload-file');
@@ -11,6 +13,9 @@
   var scaleSmallerElement = uploadFormElement.querySelector('.scale__control--smaller');
   var scaleBiggerElement = uploadFormElement.querySelector('.scale__control--bigger');
   var scaleValueElement = uploadFormElement.querySelector('.scale__control--value');
+  var hashTagElement = uploadFormElement.querySelector('.text__hashtags');
+  var commentElement = uploadFormElement.querySelector('.text__description');
+  var submitButtonElement = uploadFormElement.querySelector('.img-upload__submit');
 
   //закрытие формы
   closeButtonElement.addEventListener('click', function () {
@@ -59,7 +64,7 @@
     if (evt.target.value === 'none') effectLevelElement.classList.add('hidden');
     else effectLevelElement.classList.remove('hidden');
     effectLevelValueElement.value = 100;
-    setEffect();
+    effectRange.setPosition(1);
   }
 
   effectsListElement.addEventListener('change', onChangeEffect);
@@ -91,4 +96,78 @@
   scaleBiggerElement.addEventListener('click', function() {
     setScale(parseInt(scaleValueElement.value) + 25);
   });
+
+  //работы ползунка
+  var onEffectValueChange = function(newValue) {
+    effectLevelValueElement.value = newValue;
+    setEffect();
+  }
+
+  var effectRange = new window.InputRange('.effect-level__line',
+                                          '.effect-level__depth',
+                                          '.effect-level__pin',
+                                          onEffectValueChange, 1);
+
+  //проверка поля хэштега
+  var checkDublicates = function(array) {
+    for(var i = 0; i <= array.length; i++) {
+      for(var j = i; j <= array.length; j++) {
+        if(i != j && array[i] == array[j]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  var checkHashTagValidity = function() {
+    var customValidity = '';
+    var text = hashTagElement.value.trim();
+    if (text !== '') {
+      var tags = text.split(' ');
+      tags.map(tag => tag.toLowerCase());
+
+      if (tags.length > 5) customValidity += 'Максимальное количество хештегов - 5. \n';
+
+      var tooLongTag = tags.some(tag => tag.length > 20);
+      if (tooLongTag) customValidity += 'Максимальная длинна хештега - 20 символов. \n';
+
+      var noSharpTag = tags.some(tag => tag.charAt(0) !== '#');
+      if (noSharpTag) customValidity += 'Все хештеги должны начинаться с # \n';
+
+      var noSharpTag = tags.some(tag => tag === '#');
+      if (noSharpTag) customValidity += 'Хештеги не могут состоять только из символа # \n';
+
+      if (checkDublicates(tags)) customValidity += 'Не должно быть нескольких одинаковых хештегов \n';
+    }
+
+    hashTagElement.setCustomValidity(customValidity);
+  }
+
+  var checkCommentValidity = function() {
+    if (commentElement.validity.tooLong) {
+      commentElement.setCustomValidity('Комментарий не должен быть длиннее 140 символов');
+    } else {
+      commentElement.setCustomValidity('');
+    }
+  }
+
+  hashTagElement.addEventListener('input', checkHashTagValidity);
+  commentElement.addEventListener('input', checkCommentValidity);
+
+  hashTagElement.addEventListener('keydown', function(evt) {
+    var ESC_KEYCODE = 27;
+    if (evt.keyCode === ESC_KEYCODE) evt.stopPropagation();
+  });
+
+  commentElement.addEventListener('keydown', function(evt) {
+    var ESC_KEYCODE = 27;
+    if (evt.keyCode === ESC_KEYCODE) evt.stopPropagation();
+  });
+
+  submitButtonElement.addEventListener('click', function(evt) {
+    checkHashTagValidity();
+    checkCommentValidity();
+  });
+
 })();
