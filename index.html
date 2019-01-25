@@ -16,9 +16,9 @@
     <section class="img-filters  img-filters--inactive  container">
       <h2 class="img-filters__title  visually-hidden">Фильтр фотографий</h2>
       <form class="img-filters__form" action="index.html" method="get" autocomplete="off">
-        <button type=button class="img-filters__button  img-filters__button--active" id="filter-popular">Популярные</button>
-        <button type=button class="img-filters__button" id="filter-new">Новые</button>
-        <button type=button class="img-filters__button" id="filter-discussed">Обсуждаемые</button>
+        <button type="button" class="img-filters__button  img-filters__button--active" id="filter-popular">Популярные</button>
+        <button type="button" class="img-filters__button" id="filter-new">Новые</button>
+        <button type="button" class="img-filters__button" id="filter-discussed">Обсуждаемые</button>
       </form>
     </section>
 
@@ -135,8 +135,8 @@
     </section>
 
     <!-- Полноэкранный показ изображения -->
-    <section class="big-picture  overlay  hidden">
-      <h2 class="big-picture__title  visually-hidden">Просмотр фотографии</h2>
+    <section class="big-picture overlay hidden">
+      <h2 class="big-picture__title visually-hidden">Просмотр фотографии</h2>
       <div class="big-picture__preview">
 
         <!-- Просмотр изображения -->
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Информация об изображении. Подпись, комментарии, количество лайков -->
-        <div class="big-picture__social  social">
+        <div class="big-picture__social hidden social">
           <div class="social__header">
             <img class="social__picture" src="img/avatar-1.svg" alt="Аватар автора фотографии" width="35" height="35">
             <p class="social__caption">Тестим новую камеру! =)</p>
@@ -214,8 +214,8 @@
       <div class="error__inner">
         <h2 class="error__title">Ошибка загрузки файла</h2>
         <div class="error__buttons">
-          <button type="button" class="error__button">Попробовать снова</button>
-          <button type="button" class="error__button">Загрузить другой файл</button>
+          <button type="button" class="error__button error__button--try">Попробовать снова</button>
+          <button type="button" class="error__button error__button--other">Загрузить другой файл</button>
         </div>
       </div>
     </section>
@@ -236,9 +236,13 @@
     <div class="img-upload__message  img-upload__message--loading">Загружаем...</div>
   </template>
 
-  <script src="js/load-input-files.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/backend.js"></script>
+  <script src="js/debounce.js"></script>
   <script src="js/input-range.js"></script>
-  <script src="js/image-editor.js"></script>
+  <script src="js/photo-editor.js"></script>
+  <script src="js/photo-viewer.js"></script>
+  <script src="js/photo-filter.js"></script>
+  <script src="js/photo-loader.js"></script>
 </body>
 </html>

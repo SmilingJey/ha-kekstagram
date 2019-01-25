@@ -16,6 +16,13 @@
   var hashTagElement = uploadFormElement.querySelector('.text__hashtags');
   var commentElement = uploadFormElement.querySelector('.text__description');
   var submitButtonElement = uploadFormElement.querySelector('.img-upload__submit');
+  var uploadControlElement = uploadFormElement.querySelector('.img-upload__control');
+  var mainElement = document.querySelector('main');
+  var imgPreviewContainerElement = uploadFormElement.querySelector('.img-upload__preview');
+
+  var successMessageTemplate = document.querySelector('#success').content.querySelector('.success');
+  var sendingMessageTemplate = document.querySelector('#messages').content.querySelector('.img-upload__message');
+  var errorMessageTemplate = document.querySelector('#error').content.querySelector('.error');
 
   //закрытие формы
   closeButtonElement.addEventListener('click', function () {
@@ -23,7 +30,7 @@
   });
 
   var onUploadEditorEsc = function(evt) {
-    window.util.isEscEvent(evt, closeUploadEditior);
+    window.utils.isEscEvent(evt, closeUploadEditior);
   }
 
   var closeUploadEditior = function(img) {
@@ -33,13 +40,33 @@
   }
 
   // загрузка изображения
+  var showLoadingMessage = function () {
+    imgPreviewContainerElement.appendChild(sendingMessageTemplate.cloneNode(true));
+  }
+
+  var hideLoadingMessage = function () {
+    var sendingMessage = imgPreviewContainerElement.querySelector('.img-upload__message');
+    if (sendingMessage) {
+      imgPreviewContainerElement.removeChild(sendingMessage);
+    }
+  }
+
   var onUploadImage = function(evt) {
-    showUploadEditior(evt.target.result);
+    hideLoadingMessage();
+    imgPreviewElement.src = evt.target.result;
+    Array.from(filterPreviewElements).forEach(function(elem) {
+      elem.style.backgroundImage = `url(${evt.target.result})`;
+    });
+  }
+
+  var onPreUploadImage = function () {
+    showLoadingMessage();
   }
 
   inputUploadFileElement.addEventListener('change', function() {
     var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
-    window.loadInputFiles(inputUploadFileElement.files, onUploadImage, FILE_TYPES);
+    var loading = window.utils.loadInputFiles(inputUploadFileElement.files, onPreUploadImage, onUploadImage, FILE_TYPES);
+    if (loading) showUploadEditior();
   });
 
   //открытие формы
@@ -49,11 +76,12 @@
     setEffect();
   }
 
+  var hideUploadEditior = function(img) {
+    resetEditor();
+    uploadEditorElement.classList.add('hidden');
+  }
+
   var showUploadEditior = function(img) {
-    imgPreviewElement.src = img;
-    Array.from(filterPreviewElements).forEach(function(elem) {
-      elem.style.backgroundImage = `url(${img})`;
-    });
     uploadEditorElement.classList.remove('hidden');
     document.addEventListener('keydown', onUploadEditorEsc);
     resetEditor();
@@ -108,7 +136,7 @@
                                           '.effect-level__pin',
                                           onEffectValueChange, 1);
 
-  //проверка поля хэштега
+  //валидация формы
   var checkDublicates = function(array) {
     for(var i = 0; i <= array.length; i++) {
       for(var j = i; j <= array.length; j++) {
@@ -145,11 +173,11 @@
   }
 
   var checkCommentValidity = function() {
+    var validityText = '';
     if (commentElement.validity.tooLong) {
-      commentElement.setCustomValidity('Комментарий не должен быть длиннее 140 символов');
-    } else {
-      commentElement.setCustomValidity('');
+      validityText = 'Комментарий не должен быть длиннее 140 символов';
     }
+    commentElement.setCustomValidity(validityText);
   }
 
   hashTagElement.addEventListener('input', checkHashTagValidity);
@@ -170,4 +198,34 @@
     checkCommentValidity();
   });
 
+  //отправка формы
+  var onSubmitSuccess = function() {
+    var successMessageElement = successMessageTemplate.cloneNode(true);
+    window.utils.showMessage(successMessageElement, mainElement);
+    hideUploadEditior();
+    //uploadControlElement.classList.add('hidden');
+  };
+
+  var onSubmitError = function () {
+    var errorMessageElement = errorMessageTemplate.cloneNode(true);
+    var errorButtonTry = errorMessageElement.querySelector('.error__button--try');
+    errorButtonTry.addEventListener('click', sendFormData);
+
+    var errorButtonOther = errorMessageElement.querySelector('.error__button--other');
+    errorButtonOther.addEventListener('click', function(){
+      hideUploadEditior();
+      inputUploadFileElement.click();
+    });
+    window.utils.showMessage(errorMessageElement, mainElement);
+  };
+
+  var sendFormData = function() {
+    var data = new FormData(uploadFormElement);
+    window.backend.saveForm(data, onSubmitSuccess, onSubmitError);
+  }
+
+  uploadFormElement.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    sendFormData();
+  });
 })();
